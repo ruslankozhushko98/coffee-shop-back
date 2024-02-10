@@ -32,7 +32,7 @@ export const beverages: Array<BeverageOptions> = [
   },
 ];
 
-const upsertBeverage = (data: BeverageOptions) =>
+const upsertBeverage = (data: BeverageOptions): Promise<Beverage> =>
   prisma.beverage.upsert({
     where: {
       title: data.title,
