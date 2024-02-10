@@ -29,6 +29,12 @@ enum ORDER_STATUS {
   CLOSED
 }
 
+enum SIZES {
+  SMALL
+  MEDIUM
+  LARGE
+}
+
 model User {
   @@map("users")
   id        Int      @id @default(autoincrement())
@@ -39,8 +45,8 @@ model User {
   dob       String   @map("date_of_birth")
   gender    GENDER?  @default(OTHER)
   orders    Order[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt      @map("updated_at")
 }
 
 model Order {
@@ -50,19 +56,18 @@ model Order {
   userId    Int          @map("user_id")
   beverages BeveragesOnOrders[]
   status    ORDER_STATUS @default(RECEIVED)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt      @map("updated_at")
 }
 
 model Beverage {
   @@map("beverages")
   id          Int      @id @default(autoincrement())
-  title       String
-  type        BEVERAGE_TYPES
-  ingredients BeverageIngredients[]
+  title       String   @unique
+  description String
   orders      BeveragesOnOrders[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt      @map("updated_at")
 }
 
 model BeveragesOnOrders {
@@ -74,32 +79,11 @@ model BeveragesOnOrders {
   order      Order    @relation(fields: [orderId], references: [id])
   orderId    Int      @map("order_id")
 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  size       SIZES    @default(SMALL)
+  type       BEVERAGE_TYPES
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt      @map("updated_at")
 
   @@id([beverageId, orderId])
-}
-
-model Ingredient {
-  @@map("ingredients")
-  id        Int      @id @default(autoincrement())
-  title     String
-  beverages BeverageIngredients[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model BeverageIngredients {
-  @@map("bevereage_ingredients")
-
-  beverage     Beverage   @relation(fields: [beverageId], references: [id])
-  beverageId   Int        @map("beverage_id")
-
-  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
-  ingredientId Int        @map("ingredient_id")
-
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-
-  @@id([beverageId, ingredientId])
 }
