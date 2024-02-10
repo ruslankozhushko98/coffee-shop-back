@@ -1,5 +1,7 @@
 import { GENDER } from '@prisma/client';
-import { IsEmail, IsNotEmpty, IsString, Min } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, Matches, Min } from 'class-validator';
+
+import { PASSWORD_REGEX } from 'src/auth/utils/constants';
 
 export class SignUpDto {
   @IsEmail(null, { message: 'Email is invalid!' })
@@ -9,7 +11,17 @@ export class SignUpDto {
 
   @IsString()
   @IsNotEmpty({ message: 'Password is required!' })
-  @Min(6)
+  @Min(8)
+  @Matches(PASSWORD_REGEX, {
+    message: `
+      Password must contain:
+      1. Upper-case letters;
+      2. Lower-case letters;
+      3. Special characters;
+      4. Numbers;
+      5. Length must be at least 8 characters;
+    `,
+  })
   password: string;
 
   @IsString()

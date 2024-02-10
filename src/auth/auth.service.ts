@@ -39,7 +39,7 @@ export class AuthService {
     return this.signToken({ userId: user.id, email: user.email });
   }
 
-  public async signUp(signUpDto: SignUpDto) {
+  public async signUp(signUpDto: SignUpDto): Promise<AccessTokenObj> {
     const user = await this.prismaService.user.findUnique({
       where: {
         email: signUpDto.email,
@@ -62,7 +62,7 @@ export class AuthService {
     return this.signToken({ userId: newUser.id, email: newUser.email });
   }
 
-  public async signToken(payload: Payload) {
+  public async signToken(payload: Payload): Promise<AccessTokenObj> {
     const accessToken = await this.jwt.signAsync(payload, {
       secret: this.config.get('SECRET_KEY'),
     });
