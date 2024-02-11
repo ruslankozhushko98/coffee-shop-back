@@ -34,7 +34,11 @@ export class OrdersService {
         id: orderId,
       },
       include: {
-        beverages: true,
+        beverages: {
+          include: {
+            beverage: true,
+          },
+        },
       },
     });
   }

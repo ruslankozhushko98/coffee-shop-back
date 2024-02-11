@@ -17,7 +17,7 @@ export class AuthService {
   ) {}
 
   public async signIn(signInDto: SignInDto): Promise<AccessTokenObj> {
-    const user = await this.prismaService.user.findUnique({
+    const user = await this.prismaService.user.findFirst({
       where: {
         email: signInDto.email,
       },
@@ -40,7 +40,7 @@ export class AuthService {
   }
 
   public async signUp(signUpDto: SignUpDto): Promise<AccessTokenObj> {
-    const user = await this.prismaService.user.findUnique({
+    const user = await this.prismaService.user.findFirst({
       where: {
         email: signUpDto.email,
       },
