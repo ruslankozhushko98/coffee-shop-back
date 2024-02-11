@@ -73,7 +73,7 @@ model Beverage {
 model BeveragesOnOrders {
   @@map("beverages_on_orders")
 
-  beverage   Beverage @relation(fields: [beverageId], references: [id])
+  beverage   Beverage @relation(fields: [beverageId], references: [id], onDelete: Cascade)
   beverageId Int      @map("beverage_id")
 
   order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
