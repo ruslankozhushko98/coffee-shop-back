@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Order } from '@prisma/client';
 
+import { LimitOffset } from 'src/utils/types';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateOrderDto } from './dto';
 
@@ -8,12 +9,27 @@ import { CreateOrderDto } from './dto';
 export class OrdersService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  public getOrders(): Promise<Array<Order>> {
-    return this.prismaService.order.findMany();
+  public getOrders({ limit, offset }: LimitOffset): Promise<Array<Order>> {
+    return this.prismaService.order.findMany({
+      take: limit,
+      skip: offset,
+      include: {
+        beverages: {
+          include: {
+            beverage: {
+              select: {
+                title: true,
+                description: true,
+              },
+            },
+          },
+        },
+      },
+    });
   }
 
   public getOrderById(orderId: number): Promise<Order> {
-    return this.prismaService.order.findUnique({
+    return this.prismaService.order.findFirst({
       where: {
         id: orderId,
       },
@@ -25,9 +41,7 @@ export class OrdersService {
 
   public async createOrder({
     userId,
-    beverageId,
-    size,
-    type,
+    beverages,
   }: CreateOrderDto): Promise<Order> {
     const order = await this.prismaService.order.create({
       data: {
@@ -35,15 +49,16 @@ export class OrdersService {
       },
     });
 
+    const mappedBeverages = beverages.map((item) => ({
+      ...item,
+      orderId: order.id,
+    }));
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const beverageOnOrder = await this.prismaService.beveragesOnOrders.create({
-      data: {
-        orderId: order.id,
-        beverageId,
-        size,
-        type,
-      },
-    });
+    const beveragesOnOrder =
+      await this.prismaService.beveragesOnOrders.createMany({
+        data: mappedBeverages,
+      });
 
     return order;
   }

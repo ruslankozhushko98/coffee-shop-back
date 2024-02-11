@@ -52,7 +52,7 @@ model User {
 model Order {
   @@map("orders")
   id        Int          @id @default(autoincrement())
-  user      User         @relation(fields: [userId], references: [id])
+  user      User         @relation(fields: [userId], references: [id], onDelete: NoAction)
   userId    Int          @map("user_id")
   beverages BeveragesOnOrders[]
   status    ORDER_STATUS @default(RECEIVED)
@@ -76,7 +76,7 @@ model BeveragesOnOrders {
   beverage   Beverage @relation(fields: [beverageId], references: [id])
   beverageId Int      @map("beverage_id")
 
-  order      Order    @relation(fields: [orderId], references: [id])
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId    Int      @map("order_id")
 
   size       SIZES    @default(SMALL)
