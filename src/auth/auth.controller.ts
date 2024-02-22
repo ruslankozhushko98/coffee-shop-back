@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 import { AuthService } from './auth.service';
-import { SignInDto, SignUpDto } from './dto';
+import { AuthBiometricDto, PublicKeyDto, SignInDto, SignUpDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
@@ -22,5 +22,15 @@ export class AuthController {
   @Get('me')
   public getMe(@Req() req) {
     return this.authService.getMe(req.user.id);
+  }
+
+  @Post('/create-public-key')
+  public createPublicKey(@Body() body: PublicKeyDto) {
+    return this.authService.createPublicKey(body);
+  }
+
+  @Post('/auth-biometric')
+  public authBiometric(@Body() body: AuthBiometricDto) {
+    return this.authService.authBiometric(body);
   }
 }
