@@ -6,7 +6,8 @@ import { User } from '@prisma/client';
 import * as crypto from 'crypto';
 
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AccessTokenObj, Payload } from './utils/types';
+import { AccountService } from 'src/account/account.service';
+import { AuthObj, Payload } from './utils/types';
 import { SignInDto, SignUpDto, PublicKeyDto, AuthBiometricDto } from './dto';
 
 @Injectable()
@@ -15,9 +16,10 @@ export class AuthService {
     private prismaService: PrismaService,
     private jwt: JwtService,
     private config: ConfigService,
+    private accountService: AccountService,
   ) {}
 
-  public async signIn(signInDto: SignInDto): Promise<AccessTokenObj> {
+  public async signIn(signInDto: SignInDto): Promise<AuthObj> {
     const user = await this.prismaService.user.findFirst({
       where: {
         email: signInDto.email,
@@ -37,10 +39,25 @@ export class AuthService {
       throw new ForbiddenException('Wrong email or password!');
     }
 
-    return this.signToken({ userId: user.id, email: user.email });
+    if (!user.isVerified) {
+      await this.accountService.createOTC(user.id);
+    }
+
+    const accessToken = await this.signToken({
+      userId: user.id,
+      email: user.email,
+    });
+
+    delete user.password;
+    delete user.publicKey;
+
+    return {
+      accessToken,
+      user,
+    };
   }
 
-  public async signUp(signUpDto: SignUpDto): Promise<AccessTokenObj> {
+  public async signUp(signUpDto: SignUpDto): Promise<{ accessToken: string }> {
     const user = await this.prismaService.user.findFirst({
       where: {
         email: signUpDto.email,
@@ -60,18 +77,23 @@ export class AuthService {
       },
     });
 
-    return this.signToken({ userId: newUser.id, email: newUser.email });
-  }
-
-  public async signToken(payload: Payload): Promise<AccessTokenObj> {
-    const accessToken = await this.jwt.signAsync(payload, {
-      secret: this.config.get('SECRET_KEY'),
+    const accessToken = await this.signToken({
+      userId: newUser.id,
+      email: newUser.email,
     });
 
     return { accessToken };
   }
 
-  public async getMe(userId: number): Promise<Omit<User, 'password'>> {
+  public signToken(payload: Payload): Promise<string> {
+    return this.jwt.signAsync(payload, {
+      secret: this.config.get('SECRET_KEY'),
+    });
+  }
+
+  public async getMe(
+    userId: number,
+  ): Promise<Omit<User, 'password' | 'publicKey'>> {
     const user = await this.prismaService.user.findUnique({
       where: {
         id: userId,
@@ -84,7 +106,11 @@ export class AuthService {
     return user;
   }
 
-  public async createPublicKey({ userId, key }: PublicKeyDto): Promise<{ message: string }> {
+  public async createPublicKey({
+    userId,
+    key,
+  }: PublicKeyDto): Promise<{ message: string }> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const res = await this.prismaService.user.update({
       where: {
         id: userId,
@@ -99,7 +125,10 @@ export class AuthService {
     };
   }
 
-  public async authBiometric({ signature, payload }: AuthBiometricDto): Promise<AccessTokenObj> {
+  public async authBiometric({
+    signature,
+    payload,
+  }: AuthBiometricDto): Promise<AuthObj> {
     const userId = Number(payload.split('__')[0]);
 
     const user = await this.prismaService.user.findUnique({
@@ -123,12 +152,22 @@ export class AuthService {
     );
 
     if (!isVerified) {
-      throw new ForbiddenException('Unfortunately your biometric cannot be verified!');
+      throw new ForbiddenException(
+        'Unfortunately your biometric cannot be verified!',
+      );
     }
 
-    return this.signToken({
+    const accessToken = await this.signToken({
       userId: user.id,
       email: user.email,
     });
+
+    delete user.password;
+    delete user.publicKey;
+
+    return {
+      accessToken,
+      user,
+    };
   }
 }

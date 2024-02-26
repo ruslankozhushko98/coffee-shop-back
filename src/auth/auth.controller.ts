@@ -24,6 +24,7 @@ export class AuthController {
     return this.authService.getMe(req.user.id);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Post('/create-public-key')
   public createPublicKey(@Body() body: PublicKeyDto) {
     return this.authService.createPublicKey(body);

@@ -37,15 +37,28 @@ enum SIZES {
 
 model User {
   @@map("users")
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  password     String
+  firstName    String   @map("first_name")
+  lastName     String   @map("last_name")
+  dob          String   @map("date_of_birth")
+  gender       GENDER?  @default(OTHER)
+  orders       Order[]
+  publicKey    String?  @map("public_key")
+  isVerified   Boolean? @default(false) @map("is_verified")
+  oneTimeCodes OneTimeCode[]
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt      @map("updated_at")
+}
+
+model OneTimeCode {
+  @@map("one_time_codes")
   id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  firstName String   @map("first_name")
-  lastName  String   @map("last_name")
-  dob       String   @map("date_of_birth")
-  gender    GENDER?  @default(OTHER)
-  orders    Order[]
-  publicKey String?  @map("public_key")
+  code      String
+  expiresAt DateTime @map("expires_at")
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: NoAction)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt      @map("updated_at")
 }
