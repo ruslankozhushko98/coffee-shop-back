@@ -46,7 +46,7 @@ model User {
   gender       GENDER?  @default(OTHER)
   orders       Order[]
   publicKey    String?  @map("public_key")
-  isVerified   Boolean? @default(false) @map("is_verified")
+  isActivated  Boolean? @default(false) @map("is_activated")
   oneTimeCodes OneTimeCode[]
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt      @map("updated_at")

@@ -39,7 +39,7 @@ export class AuthService {
       throw new ForbiddenException('Wrong email or password!');
     }
 
-    if (!user.isVerified) {
+    if (!user.isActivated) {
       await this.accountService.createOTC(user.id);
     }
 
@@ -145,13 +145,13 @@ export class AuthService {
 
     verifier.update(payload);
 
-    const isVerified = verifier.verify(
+    const isActivated = verifier.verify(
       `-----BEGIN PUBLIC KEY-----\n${user.publicKey}\n-----END PUBLIC KEY-----`,
       signature,
       'base64',
     );
 
-    if (!isVerified) {
+    if (!isActivated) {
       throw new ForbiddenException(
         'Unfortunately your biometric cannot be verified!',
       );

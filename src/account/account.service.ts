@@ -70,7 +70,7 @@ export class AccountService {
         id: userId,
       },
       data: {
-        isVerified: true,
+        isActivated: true,
       },
     });
 
