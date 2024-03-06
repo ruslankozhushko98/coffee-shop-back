@@ -12,6 +12,10 @@ export class ResetPasswordDto {
   @IsNotEmpty({ message: 'userId is required!' })
   userId: number;
 
+  @IsNumber()
+  @IsNotEmpty({ message: 'Token is required!' })
+  resetToken: string;
+
   @IsString()
   @IsStrongPassword({
     minLength: 6,

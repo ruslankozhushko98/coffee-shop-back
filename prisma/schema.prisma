@@ -48,6 +48,7 @@ model User {
   publicKey    String?  @map("public_key")
   isActivated  Boolean? @default(false) @map("is_activated")
   oneTimeCodes OneTimeCode[]
+  tokens       Token[]
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt      @map("updated_at")
 }
@@ -55,8 +56,18 @@ model User {
 model OneTimeCode {
   @@map("one_time_codes")
   id        Int      @id @default(autoincrement())
-  code      String
+  code      String   @unique
   expiresAt DateTime @map("expires_at")
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: NoAction)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt      @map("updated_at")
+}
+
+model Token {
+  @@map("tokens")
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
   userId    Int      @map("user_id")
   user      User     @relation(fields: [userId], references: [id], onDelete: NoAction)
   createdAt DateTime @default(now()) @map("created_at")

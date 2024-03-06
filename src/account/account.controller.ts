@@ -1,20 +1,37 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 import { AccountService } from './account.service';
+import { OneTimeCodeDto, ResetPasswordDto } from './dto';
 
-@UseGuards(AuthGuard('jwt'))
 @Controller('account')
 export class AccountController {
   constructor(private accountService: AccountService) {}
 
+  @UseGuards(AuthGuard('jwt'))
   @Post('create-otc')
-  public async createOTC(@Body() body: { userId: number }) {
+  public createOTC(@Body() body: { userId: number }) {
     return this.accountService.createOTC(body.userId);
   }
 
+  @UseGuards(AuthGuard('jwt'))
+  @Post('email/activate')
+  public activateAccount(@Body() body: { code: string }, @Req() req) {
+    return this.accountService.activateAccount(req.user.id, body.code);
+  }
+
   @Post('email/verify')
-  public async verifyAccount(@Body() body: { code: string }, @Req() req) {
-    return this.accountService.verifyAccount(req.user.id, body.code);
+  public verifyAccount(@Body() body: OneTimeCodeDto) {
+    return this.accountService.verifyAccount(body);
+  }
+
+  @Post('check-user')
+  public checkUser(@Body() body: { email: string }) {
+    return this.accountService.checkUser(body.email);
+  }
+
+  @Put('reset-password')
+  public resetPassword(@Body() body: ResetPasswordDto) {
+    return this.accountService.resetPassword(body);
   }
 }

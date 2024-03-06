@@ -5,6 +5,7 @@ import * as argon2 from 'argon2';
 import { User } from '@prisma/client';
 import * as crypto from 'crypto';
 
+import { ENV_VARS } from 'src/utils/constants';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AccountService } from 'src/account/account.service';
 import { AuthObj, Payload } from './utils/types';
@@ -87,7 +88,7 @@ export class AuthService {
 
   public signToken(payload: Payload): Promise<string> {
     return this.jwt.signAsync(payload, {
-      secret: this.config.get('SECRET_KEY'),
+      secret: this.config.get(ENV_VARS.SECRET_KEY),
     });
   }
 
