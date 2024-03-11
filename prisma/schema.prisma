@@ -37,20 +37,21 @@ enum SIZES {
 
 model User {
   @@map("users")
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  password     String
-  firstName    String   @map("first_name")
-  lastName     String   @map("last_name")
-  dob          String   @map("date_of_birth")
-  gender       GENDER?  @default(OTHER)
-  orders       Order[]
-  publicKey    String?  @map("public_key")
-  isActivated  Boolean? @default(false) @map("is_activated")
-  oneTimeCodes OneTimeCode[]
-  tokens       Token[]
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt      @map("updated_at")
+  id                Int      @id @default(autoincrement())
+  email             String   @unique
+  password          String
+  firstName         String   @map("first_name")
+  lastName          String   @map("last_name")
+  dob               String   @map("date_of_birth")
+  gender            GENDER?  @default(OTHER)
+  orders            Order[]
+  publicKey         String?  @map("public_key")
+  isActivated       Boolean? @default(false) @map("is_activated")
+  oneTimeCodes      OneTimeCode[]
+  tokens            Token[]
+  favoriteBeverages FavoriteBeverages[]
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt      @map("updated_at")
 }
 
 model OneTimeCode {
@@ -87,12 +88,28 @@ model Order {
 
 model Beverage {
   @@map("beverages")
-  id          Int      @id @default(autoincrement())
-  title       String   @unique
-  description String
-  orders      BeveragesOnOrders[]
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt      @map("updated_at")
+  id                Int      @id @default(autoincrement())
+  title             String   @unique
+  description       String
+  orders            BeveragesOnOrders[]
+  favoriteBeverages FavoriteBeverages[]
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt      @map("updated_at")
+}
+
+model FavoriteBeverages {
+  @@map("favourite_beverages")
+
+  beverage   Beverage @relation(fields: [beverageId], references: [id], onDelete: Cascade)
+  beverageId Int      @map("beverage_id")
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int      @map("user_id")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt      @map("updated_at")
+
+  @@id([beverageId, userId])
 }
 
 model BeveragesOnOrders {
