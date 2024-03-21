@@ -5,6 +5,7 @@ import {
   Param,
   ParseIntPipe,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -17,7 +18,7 @@ export class MenuController {
   constructor(private menuService: MenuService) {}
 
   @Get('all')
-  public getAllMenu(@Param('title') title?: string) {
+  public getAllMenu(@Query('title') title: string) {
     return this.menuService.getAllMenu(title);
   }
 

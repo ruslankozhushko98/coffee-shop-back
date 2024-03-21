@@ -12,7 +12,9 @@ export class MenuService {
     if (title) {
       return this.prismaService.beverage.findMany({
         where: {
-          title,
+          title: {
+            contains: title,
+          },
         },
       });
     }
