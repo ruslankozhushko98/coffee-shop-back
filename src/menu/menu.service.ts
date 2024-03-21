@@ -9,17 +9,13 @@ export class MenuService {
   constructor(private prismaService: PrismaService) {}
 
   public getAllMenu(title?: string): Promise<Array<Beverage>> {
-    if (title) {
-      return this.prismaService.beverage.findMany({
-        where: {
-          title: {
-            contains: title,
-          },
+    return this.prismaService.beverage.findMany({
+      where: {
+        title: {
+          contains: title,
         },
-      });
-    }
-
-    return this.prismaService.beverage.findMany();
+      },
+    });
   }
 
   public getBeverageById(beverageId: number): Promise<Beverage> {
