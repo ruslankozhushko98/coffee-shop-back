@@ -8,12 +8,19 @@ import { ToggleFavoriteDto, UpdateBeverageDto } from './dto';
 export class MenuService {
   constructor(private prismaService: PrismaService) {}
 
-  public getAllMenu(title?: string): Promise<Array<Beverage>> {
+  public getAllMenu(
+    title?: string,
+  ): Promise<Array<Pick<Beverage, 'id' | 'title' | 'price'>>> {
     return this.prismaService.beverage.findMany({
       where: {
         title: {
           contains: title,
         },
+      },
+      select: {
+        id: true,
+        title: true,
+        price: true,
       },
     });
   }
