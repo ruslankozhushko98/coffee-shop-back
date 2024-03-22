@@ -45,11 +45,13 @@ export class OrdersService {
 
   public async createOrder({
     userId,
+    price,
     beverages,
   }: CreateOrderDto): Promise<Order> {
     const order = await this.prismaService.order.create({
       data: {
         userId,
+        price,
       },
     });
 

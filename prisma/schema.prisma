@@ -80,6 +80,7 @@ model Order {
   id        Int          @id @default(autoincrement())
   user      User         @relation(fields: [userId], references: [id], onDelete: NoAction)
   userId    Int          @map("user_id")
+  price     Int
   beverages BeveragesOnOrders[]
   status    ORDER_STATUS @default(RECEIVED)
   createdAt DateTime     @default(now()) @map("created_at")
@@ -91,6 +92,8 @@ model Beverage {
   id                Int      @id @default(autoincrement())
   title             String   @unique
   description       String
+  imgUrl            String   @map("img_url")
+  price             Int
   orders            BeveragesOnOrders[]
   favoriteBeverages FavoriteBeverages[]
   createdAt         DateTime @default(now()) @map("created_at")

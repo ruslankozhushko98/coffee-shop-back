@@ -22,6 +22,10 @@ export class CreateOrderDto {
   @IsNotEmpty()
   userId: number;
 
+  @IsNumber()
+  @IsNotEmpty()
+  price: number;
+
   @IsArray()
   @IsNotEmpty()
   beverages: Array<BeveragesOnOrderDto>;
