@@ -9,12 +9,14 @@ export class CheckUserMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     const accessToken = req.headers.authorization.split(' ')[1];
 
-    const userData = this.jwt.decode(accessToken);
+    if (accessToken) {
+      const userData = this.jwt.decode(accessToken);
 
-    req.user = {
-      id: userData.userId,
-      email: userData.email,
-    };
+      req.user = {
+        id: userData.userId,
+        email: userData.email,
+      };
+    }
 
     next();
   }

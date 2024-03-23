@@ -27,7 +27,7 @@ export class MenuService {
 
   public async getBeverageById(
     beverageId: number,
-    userId: number,
+    userId?: number,
   ): Promise<IBeverage> {
     const beverage = await this.prismaService.beverage.findFirst({
       where: {
@@ -35,13 +35,16 @@ export class MenuService {
       },
     });
 
-    const favoriteBeverage =
-      await this.prismaService.favoriteBeverages.findFirst({
+    let favoriteBeverage = null;
+
+    if (Boolean(userId)) {
+      favoriteBeverage = await this.prismaService.favoriteBeverages.findFirst({
         where: {
           beverageId,
           userId,
         },
       });
+    }
 
     return {
       ...beverage,

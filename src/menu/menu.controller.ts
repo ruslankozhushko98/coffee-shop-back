@@ -28,7 +28,7 @@ export class MenuController {
     @Param('beverageId', ParseIntPipe) beverageId: number,
     @Req() req,
   ) {
-    return this.menuService.getBeverageById(beverageId, req.user.id);
+    return this.menuService.getBeverageById(beverageId, req.user?.id);
   }
 
   @UseGuards(AuthGuard('jwt'))
