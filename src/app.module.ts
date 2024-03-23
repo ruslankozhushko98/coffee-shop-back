@@ -1,5 +1,8 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { JwtService } from '@nestjs/jwt';
+import { join } from 'path';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -9,11 +12,15 @@ import { OrdersModule } from './orders/orders.module';
 import { EmailModule } from './email/email.module';
 import { AccountModule } from './account/account.module';
 import { MenuModule } from './menu/menu.module';
+import { CheckUserMiddleware } from './check-user/check-user.middleware';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'assets'),
     }),
     AuthModule,
     PrismaModule,
@@ -23,6 +30,10 @@ import { MenuModule } from './menu/menu.module';
     MenuModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, JwtService],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(CheckUserMiddleware).forRoutes('menu/:beverageId');
+  }
+}

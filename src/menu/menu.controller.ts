@@ -6,6 +6,7 @@ import {
   ParseIntPipe,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -25,8 +26,9 @@ export class MenuController {
   @Get(':beverageId')
   public getBeverageById(
     @Param('beverageId', ParseIntPipe) beverageId: number,
+    @Req() req,
   ) {
-    return this.menuService.getBeverageById(beverageId);
+    return this.menuService.getBeverageById(beverageId, req.user.id);
   }
 
   @UseGuards(AuthGuard('jwt'))

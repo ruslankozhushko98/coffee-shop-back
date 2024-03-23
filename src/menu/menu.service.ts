@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { Beverage } from '@prisma/client';
+import { Beverage, FavoriteBeverages } from '@prisma/client';
 
 import { PrismaService } from 'src/prisma/prisma.service';
+import { BeverageOpts } from './utils/types';
 import { ToggleFavoriteDto, UpdateBeverageDto } from './dto';
+import { IBeverage } from './models';
 
 @Injectable()
 export class MenuService {
   constructor(private prismaService: PrismaService) {}
 
-  public getAllMenu(
-    title?: string,
-  ): Promise<Array<Pick<Beverage, 'id' | 'title' | 'price'>>> {
+  public getAllMenu(title?: string): Promise<Array<BeverageOpts>> {
     return this.prismaService.beverage.findMany({
       where: {
         title: {
@@ -25,12 +25,28 @@ export class MenuService {
     });
   }
 
-  public getBeverageById(beverageId: number): Promise<Beverage> {
-    return this.prismaService.beverage.findFirst({
+  public async getBeverageById(
+    beverageId: number,
+    userId: number,
+  ): Promise<IBeverage> {
+    const beverage = await this.prismaService.beverage.findFirst({
       where: {
         id: beverageId,
       },
     });
+
+    const favoriteBeverage =
+      await this.prismaService.favoriteBeverages.findFirst({
+        where: {
+          beverageId,
+          userId,
+        },
+      });
+
+    return {
+      ...beverage,
+      isFavorite: Boolean(favoriteBeverage),
+    };
   }
 
   public updateBeverage(
@@ -45,7 +61,10 @@ export class MenuService {
     });
   }
 
-  public async toggleFavorite({ beverageId, userId }: ToggleFavoriteDto) {
+  public async toggleFavorite({
+    beverageId,
+    userId,
+  }: ToggleFavoriteDto): Promise<FavoriteBeverages> {
     const beverage = await this.prismaService.favoriteBeverages.findFirst({
       where: {
         beverageId,
