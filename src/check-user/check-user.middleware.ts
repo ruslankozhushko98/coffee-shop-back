@@ -7,7 +7,7 @@ export class CheckUserMiddleware implements NestMiddleware {
   constructor(private readonly jwt: JwtService) {}
 
   use(req: Request, res: Response, next: NextFunction) {
-    const accessToken = req.headers.authorization.split(' ')[1];
+    const accessToken = req.headers?.authorization?.split(' ')[1];
 
     if (accessToken) {
       const userData = this.jwt.decode(accessToken);
