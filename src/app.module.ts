@@ -13,6 +13,7 @@ import { EmailModule } from './email/email.module';
 import { AccountModule } from './account/account.module';
 import { MenuModule } from './menu/menu.module';
 import { CheckUserMiddleware } from './check-user/check-user.middleware';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { CheckUserMiddleware } from './check-user/check-user.middleware';
     EmailModule,
     AccountModule,
     MenuModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtService],
