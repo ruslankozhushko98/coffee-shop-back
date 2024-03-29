@@ -23,6 +23,12 @@ export class MenuController {
     return this.menuService.getAllMenu(title);
   }
 
+  @UseGuards(AuthGuard('jwt'))
+  @Get('favorites')
+  public getFavoriteBeverages(@Req() req) {
+    return this.menuService.getFavoriteBeverages(req.user?.id);
+  }
+
   @Get(':beverageId')
   public getBeverageById(
     @Param('beverageId', ParseIntPipe) beverageId: number,

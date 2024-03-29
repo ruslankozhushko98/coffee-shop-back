@@ -25,6 +25,30 @@ export class MenuService {
     });
   }
 
+  public async getFavoriteBeverages(userId: number) {
+    const beverages = await this.prismaService.beverage.findMany({
+      include: {
+        favoriteBeverages: {
+          where: {
+            userId,
+          },
+          select: {
+            beverageId: true,
+          },
+        },
+      },
+    });
+
+    return beverages
+      .filter((beverage) => beverage.favoriteBeverages.length !== 0)
+      .map((beverage) => ({
+        id: beverage.id,
+        title: beverage.title,
+        price: beverage.price,
+        isFavorite: beverage.favoriteBeverages.length !== 0,
+      }));
+  }
+
   public async getBeverageById(
     beverageId: number,
     userId?: number,
