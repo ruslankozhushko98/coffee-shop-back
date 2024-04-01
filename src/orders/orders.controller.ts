@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Query,
   UseGuards,
@@ -12,10 +13,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { LimitOffset } from 'src/utils/types';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto';
-
-type OrderParam = {
-  orderId: number;
-};
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('orders')
@@ -28,8 +25,8 @@ export class OrdersController {
   }
 
   @Get('/:orderId')
-  public getOrderById(@Param() param: OrderParam) {
-    return this.orderService.getOrderById(Number(param.orderId));
+  public getOrderById(@Param('orderId', ParseIntPipe) orderId: number) {
+    return this.orderService.getOrderById(orderId);
   }
 
   @Post('/create')
