@@ -41,7 +41,7 @@ export class MenuController {
   @Put(':beverageId/update')
   public updateBeverage(
     @Param('beverageId', ParseIntPipe) beverageId: number,
-    dto: UpdateBeverageDto,
+    @Body() dto: UpdateBeverageDto,
   ) {
     return this.menuService.updateBeverage(beverageId, dto);
   }
