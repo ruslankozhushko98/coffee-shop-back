@@ -2,6 +2,8 @@ import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { JwtService } from '@nestjs/jwt';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 
 import { AppController } from './app.controller';
@@ -22,6 +24,12 @@ import { ProfileModule } from './profile/profile.module';
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'assets'),
+    }),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      playground: process.env.NODE_ENV !== 'production',
+      autoSchemaFile: true,
+      typePaths: ['./**/*/.graphql'],
     }),
     AuthModule,
     PrismaModule,
