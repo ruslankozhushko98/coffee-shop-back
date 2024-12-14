@@ -76,15 +76,16 @@ model Token {
 }
 
 model Order {
-  id         Int                 @id @default(autoincrement())
-  user       User                @relation(fields: [userId], references: [id], onDelete: NoAction)
-  userId     Int                 @map("user_id")
-  price      Int
-  starsCount Int?                @default(0) @map("stars_count")
-  beverages  BeveragesOnOrders[]
-  status     ORDER_STATUS        @default(RECEIVED)
-  createdAt  DateTime            @default(now()) @map("created_at")
-  updatedAt  DateTime            @updatedAt @map("updated_at")
+  id           Int                 @id @default(autoincrement())
+  user         User                @relation(fields: [userId], references: [id], onDelete: NoAction)
+  userId       Int                 @map("user_id")
+  price        Int
+  starsCount   Int?                @default(0) @map("stars_count")
+  beverages    BeveragesOnOrders[]
+  status       ORDER_STATUS        @default(RECEIVED)
+  additionally String?             @db.Text
+  createdAt    DateTime            @default(now()) @map("created_at")
+  updatedAt    DateTime            @updatedAt @map("updated_at")
 
   @@map("orders")
 }

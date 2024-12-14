@@ -1,5 +1,11 @@
 import { BEVERAGE_TYPES, SIZES } from '@prisma/client';
-import { IsArray, IsEnum, IsNotEmpty, IsNumber } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+} from 'class-validator';
 
 export class BeveragesOnOrderDto {
   @IsNumber()
@@ -37,4 +43,8 @@ export class CreateOrderDto {
   @IsNumber()
   @IsNotEmpty()
   starsCount: number;
+
+  @IsString()
+  @IsNotEmpty()
+  additionally: string;
 }
