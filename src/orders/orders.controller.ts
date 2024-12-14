@@ -5,6 +5,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Patch,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -12,7 +13,7 @@ import { AuthGuard } from '@nestjs/passport';
 
 import { LimitOffset } from 'src/utils/types';
 import { OrdersService } from './orders.service';
-import { CreateOrderDto } from './dto';
+import { CreateOrderDto, UpdateOrderStatusDto } from './dto';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('orders')
@@ -32,5 +33,13 @@ export class OrdersController {
   @Post('/create')
   public createOrder(@Body() body: CreateOrderDto) {
     return this.orderService.createOrder(body);
+  }
+
+  @Patch('/:orderId/update-status')
+  public updateOrder(
+    @Param('orderId', ParseIntPipe) orderId: number,
+    @Body() dto: UpdateOrderStatusDto,
+  ) {
+    return this.orderService.updateOrderStatus(orderId, dto.status);
   }
 }

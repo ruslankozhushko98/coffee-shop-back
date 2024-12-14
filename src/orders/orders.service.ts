@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Order } from '@prisma/client';
+import { Order, ORDER_STATUS } from '@prisma/client';
 
 import { LimitOffset } from 'src/utils/types';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -67,5 +67,21 @@ export class OrdersService {
       });
 
     return order;
+  }
+
+  public async updateOrderStatus(
+    orderId: number,
+    status: ORDER_STATUS,
+  ): Promise<ORDER_STATUS> {
+    const order = await this.prismaService.order.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        status,
+      },
+    });
+
+    return order.status;
   }
 }
