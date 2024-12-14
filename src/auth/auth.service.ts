@@ -14,10 +14,10 @@ import { SignInDto, SignUpDto, PublicKeyDto, AuthBiometricDto } from './dto';
 @Injectable()
 export class AuthService {
   constructor(
-    private prismaService: PrismaService,
-    private jwt: JwtService,
-    private config: ConfigService,
-    private accountService: AccountService,
+    private readonly prismaService: PrismaService,
+    private readonly jwt: JwtService,
+    private readonly config: ConfigService,
+    private readonly accountService: AccountService,
   ) {}
 
   public async signIn(signInDto: SignInDto): Promise<AuthObj> {

@@ -6,7 +6,7 @@ import { OneTimeCodeDto, ResetPasswordDto } from './dto';
 
 @Controller('account')
 export class AccountController {
-  constructor(private accountService: AccountService) {}
+  constructor(private readonly accountService: AccountService) {}
 
   @UseGuards(AuthGuard('jwt'))
   @Post('create-otc')

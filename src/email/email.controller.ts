@@ -5,7 +5,7 @@ import { EmailService } from './email.service';
 
 @Controller('email')
 export class EmailController {
-  constructor(private emailService: EmailService) {}
+  constructor(private readonly emailService: EmailService) {}
 
   @Post('/send')
   public sendEmail(@Body() body: EmailDto) {

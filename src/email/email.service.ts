@@ -9,7 +9,7 @@ import { EmailDto } from './dto';
 export class EmailService {
   private transporter: nodemailer.Transporter;
 
-  constructor(private config: ConfigService) {
+  constructor(private readonly config: ConfigService) {
     this.transporter = nodemailer.createTransport({
       service: 'gmail',
       secure: false,

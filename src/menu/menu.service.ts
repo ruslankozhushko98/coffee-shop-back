@@ -8,7 +8,7 @@ import { IBeverage } from './models';
 
 @Injectable()
 export class MenuService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   public getAllMenu(title?: string): Promise<Array<BeverageOpts>> {
     return this.prismaService.beverage.findMany({

@@ -6,7 +6,7 @@ import { AuthBiometricDto, PublicKeyDto, SignInDto, SignUpDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('sign-in')
   public signIn(@Body() signInDto: SignInDto) {

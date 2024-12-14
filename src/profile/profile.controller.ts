@@ -7,7 +7,7 @@ import { EditProfileDto } from './dto';
 @UseGuards(AuthGuard('jwt'))
 @Controller('profile')
 export class ProfileController {
-  constructor(private profileService: ProfileService) {}
+  constructor(private readonly profileService: ProfileService) {}
 
   @Put('edit')
   public editProfile(@Body() body: EditProfileDto) {

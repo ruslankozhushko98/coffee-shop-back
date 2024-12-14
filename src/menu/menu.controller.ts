@@ -16,7 +16,7 @@ import { ToggleFavoriteDto, UpdateBeverageDto } from './dto';
 
 @Controller('menu')
 export class MenuController {
-  constructor(private menuService: MenuService) {}
+  constructor(private readonly menuService: MenuService) {}
 
   @Get('all')
   public getAllMenu(@Query('title') title: string) {

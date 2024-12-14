@@ -45,6 +45,7 @@ model User {
   oneTimeCodes      OneTimeCode[]
   tokens            Token[]
   favoriteBeverages FavoriteBeverages[]
+  starsBalance      Int?                @default(0) @map("stars_balance")
   createdAt         DateTime            @default(now()) @map("created_at")
   updatedAt         DateTime            @updatedAt @map("updated_at")
 
@@ -75,14 +76,15 @@ model Token {
 }
 
 model Order {
-  id        Int                 @id @default(autoincrement())
-  user      User                @relation(fields: [userId], references: [id], onDelete: NoAction)
-  userId    Int                 @map("user_id")
-  price     Int
-  beverages BeveragesOnOrders[]
-  status    ORDER_STATUS        @default(RECEIVED)
-  createdAt DateTime            @default(now()) @map("created_at")
-  updatedAt DateTime            @updatedAt @map("updated_at")
+  id         Int                 @id @default(autoincrement())
+  user       User                @relation(fields: [userId], references: [id], onDelete: NoAction)
+  userId     Int                 @map("user_id")
+  price      Int
+  starsCount Int?                @default(0) @map("stars_count")
+  beverages  BeveragesOnOrders[]
+  status     ORDER_STATUS        @default(RECEIVED)
+  createdAt  DateTime            @default(now()) @map("created_at")
+  updatedAt  DateTime            @updatedAt @map("updated_at")
 
   @@map("orders")
 }
@@ -93,6 +95,7 @@ model Beverage {
   description       String
   imgUrl            String              @map("img_url")
   price             Int
+  starsCount        Int?                @default(0) @map("stars_count")
   orders            BeveragesOnOrders[]
   favoriteBeverages FavoriteBeverages[]
   createdAt         DateTime            @default(now()) @map("created_at")
@@ -122,9 +125,9 @@ model BeveragesOnOrders {
   order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId Int   @map("order_id")
 
-  size   SIZES          @default(SMALL)
-  type   BEVERAGE_TYPES
-  amount Int            @default(1)
+  size SIZES          @default(SMALL)
+  type BEVERAGE_TYPES
+  qty  Int            @default(1)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

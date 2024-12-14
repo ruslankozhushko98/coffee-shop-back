@@ -14,7 +14,11 @@ export class BeveragesOnOrderDto {
   type: BEVERAGE_TYPES;
 
   @IsNumber()
-  amount: number;
+  qty: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  starsCount: number;
 }
 
 export class CreateOrderDto {
@@ -29,4 +33,8 @@ export class CreateOrderDto {
   @IsArray()
   @IsNotEmpty()
   beverages: Array<BeveragesOnOrderDto>;
+
+  @IsNumber()
+  @IsNotEmpty()
+  starsCount: number;
 }
