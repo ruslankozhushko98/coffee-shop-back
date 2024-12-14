@@ -57,7 +57,7 @@ model OneTimeCode {
   code      String   @unique
   expiresAt DateTime @map("expires_at")
   userId    Int      @map("user_id")
-  user      User     @relation(fields: [userId], references: [id], onDelete: NoAction)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -68,7 +68,7 @@ model Token {
   id        Int      @id @default(autoincrement())
   token     String   @unique
   userId    Int      @map("user_id")
-  user      User     @relation(fields: [userId], references: [id], onDelete: NoAction)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -115,7 +115,7 @@ model FavoriteBeverages {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@id([beverageId, userId])
-  @@map("favourite_beverages")
+  @@map("favorite_beverages")
 }
 
 model BeveragesOnOrders {
