@@ -36,7 +36,7 @@ export class OrdersController {
   }
 
   @Patch('/:orderId/update-status')
-  public updateOrder(
+  public updateOrderStatus(
     @Param('orderId', ParseIntPipe) orderId: number,
     @Body() dto: UpdateOrderStatusDto,
   ) {
