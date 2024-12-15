@@ -58,7 +58,9 @@ export class AuthService {
     };
   }
 
-  public async signUp(signUpDto: SignUpDto): Promise<{ accessToken: string }> {
+  public async signUp(
+    signUpDto: SignUpDto,
+  ): Promise<Pick<AuthObj, 'accessToken'>> {
     const user = await this.prismaService.user.findFirst({
       where: {
         email: signUpDto.email,
