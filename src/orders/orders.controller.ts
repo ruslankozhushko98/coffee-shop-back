@@ -8,6 +8,7 @@ import {
   Patch,
   Query,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -31,8 +32,11 @@ export class OrdersController {
   }
 
   @Post('/create')
-  public createOrder(@Body() body: CreateOrderDto) {
-    return this.orderService.createOrder(body);
+  public createOrder(@Req() req, @Body() body: Omit<CreateOrderDto, 'userId'>) {
+    return this.orderService.createOrder({
+      ...body,
+      userId: req.user.id,
+    });
   }
 
   @Patch('/:orderId/update-status')
