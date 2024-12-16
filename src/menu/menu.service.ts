@@ -50,6 +50,7 @@ export class MenuService {
   }
 
   public async getBeverageById(
+    host: string,
     beverageId: number,
     userId?: number,
   ): Promise<IBeverage> {
@@ -72,6 +73,7 @@ export class MenuService {
 
     return {
       ...beverage,
+      imgUrl: `${host}/assets/${beverage.title}.jpeg`,
       isFavorite: Boolean(favoriteBeverage),
     };
   }

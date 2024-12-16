@@ -22,6 +22,7 @@ import { ProfileModule } from './profile/profile.module';
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'assets'),
+      serveRoot: '/assets',
     }),
     AuthModule,
     PrismaModule,
