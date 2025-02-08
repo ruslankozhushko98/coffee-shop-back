@@ -42,37 +42,12 @@ model User {
   orders            Order[]
   publicKey         String?             @map("public_key")
   isActivated       Boolean?            @default(false) @map("is_activated")
-  oneTimeCodes      OneTimeCode[]
-  tokens            Token[]
   favoriteBeverages FavoriteBeverages[]
   starsBalance      Int?                @default(0) @map("stars_balance")
   createdAt         DateTime            @default(now()) @map("created_at")
   updatedAt         DateTime            @updatedAt @map("updated_at")
 
   @@map("users")
-}
-
-model OneTimeCode {
-  id        Int      @id @default(autoincrement())
-  code      String   @unique
-  expiresAt DateTime @map("expires_at")
-  userId    Int      @map("user_id")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("one_time_codes")
-}
-
-model Token {
-  id        Int      @id @default(autoincrement())
-  token     String   @unique
-  userId    Int      @map("user_id")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("tokens")
 }
 
 model Order {

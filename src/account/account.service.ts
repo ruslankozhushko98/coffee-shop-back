@@ -9,6 +9,7 @@ import * as argon from 'argon2';
 import { User } from '@prisma/client';
 
 import { checkIsOTCExpired, generateOTC } from 'src/utils/helpers';
+import { RedisService } from 'src/redis/redis.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EmailService } from 'src/email/email.service';
 import { OTC_DURATION, OTC_LENGTH } from './utils/constants';
@@ -17,34 +18,31 @@ import { OneTimeCodeDto, ResetPasswordDto } from './dto';
 @Injectable()
 export class AccountService {
   constructor(
-    private prismaService: PrismaService,
-    private emailService: EmailService,
+    private readonly redisService: RedisService,
+    private readonly prismaService: PrismaService,
+    private readonly emailService: EmailService,
   ) {}
 
   public async createOTC(userId: number) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const otcRemoved = await this.prismaService.oneTimeCode.deleteMany({
-      where: {
-        userId,
-      },
-    });
+    await this.redisService.delete(`otc-${userId}`);
 
     const code = generateOTC(OTC_LENGTH);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const otc = await this.prismaService.oneTimeCode.create({
-      data: {
+    await this.redisService.set(
+      `otc-${userId}`,
+      JSON.stringify({
         userId,
         code,
         expiresAt: dayjs().add(OTC_DURATION, 'minutes').toDate(),
-      },
-      include: {
-        user: true,
-      },
+      }),
+    );
+
+    const user = await this.prismaService.user.findFirst({
+      where: { id: userId },
     });
 
     await this.emailService.sendEmail({
-      to: otc.user.email,
+      to: user.email,
       subject: 'CoffeeShop Account Verification',
       text: `Your verification code is: ${code}. This is a sensitive information, so don't tell it anybody!`,
     });
@@ -55,14 +53,9 @@ export class AccountService {
   }
 
   public async activateAccount(userId: number, code: string) {
-    const otc = await this.prismaService.oneTimeCode.findFirst({
-      where: {
-        userId,
-        code,
-      },
-    });
+    const otc = JSON.parse(await this.redisService.get(`otc-${userId}`));
 
-    if (!otc) {
+    if (!otc || otc.code !== code) {
       throw new NotFoundException('Invalid one-time code');
     }
 
@@ -83,11 +76,7 @@ export class AccountService {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const otcDeleted = await this.prismaService.oneTimeCode.delete({
-      where: {
-        id: otc.id,
-      },
-    });
+    const otcDeleted = await this.redisService.delete(`otc-${userId}`);
 
     return {
       message: 'Account activated successfully!',
@@ -105,11 +94,7 @@ export class AccountService {
       throw new NotFoundException('User with such email does not exist!');
     }
 
-    await this.prismaService.oneTimeCode.deleteMany({
-      where: {
-        userId: user.id,
-      },
-    });
+    await this.redisService.delete(`otc-${user.id}`);
 
     const { message } = await this.createOTC(user.id);
 
@@ -123,20 +108,11 @@ export class AccountService {
     code,
     userId,
   }: OneTimeCodeDto): Promise<{ userId: number; token: string }> {
-    await this.prismaService.token.deleteMany({
-      where: {
-        id: userId,
-      },
-    });
+    await this.redisService.delete(`token-${userId}`);
 
-    const otc = await this.prismaService.oneTimeCode.findFirst({
-      where: {
-        code,
-        userId,
-      },
-    });
+    const otc = JSON.parse(await this.redisService.get(`otc-${userId}`));
 
-    if (!otc) {
+    if (!otc || otc.code !== code) {
       throw new NotFoundException('Invalid one-time code');
     }
 
@@ -149,12 +125,7 @@ export class AccountService {
     const hex: string = crypto.randomBytes(64).toString('hex');
     const token: string = await argon.hash(hex);
 
-    await this.prismaService.token.create({
-      data: {
-        userId,
-        token,
-      },
-    });
+    await this.redisService.set(`token-${userId}`, token);
 
     return {
       token,
@@ -167,11 +138,7 @@ export class AccountService {
     resetToken,
     password,
   }: ResetPasswordDto): Promise<User> {
-    const { token } = await this.prismaService.token.findFirst({
-      where: {
-        userId,
-      },
-    });
+    const token = await this.redisService.get(`token-${userId}`);
 
     if (token !== resetToken) {
       throw new ForbiddenException('Invalid token!');

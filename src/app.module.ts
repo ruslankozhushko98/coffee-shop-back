@@ -14,6 +14,7 @@ import { AccountModule } from './account/account.module';
 import { MenuModule } from './menu/menu.module';
 import { CheckUserMiddleware } from './check-user/check-user.middleware';
 import { ProfileModule } from './profile/profile.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ProfileModule } from './profile/profile.module';
     AccountModule,
     MenuModule,
     ProfileModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtService],
