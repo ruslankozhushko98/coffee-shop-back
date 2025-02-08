@@ -1,21 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { Beverage, FavoriteBeverages } from '@prisma/client';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Like, Repository } from 'typeorm';
 
-import { PrismaService } from 'src/prisma/prisma.service';
+import { User } from 'src/auth/entities';
 import { BeverageOpts } from './utils/types';
 import { ToggleFavoriteDto, UpdateBeverageDto } from './dto';
-import { IBeverage } from './models';
+import { Beverage } from './entities';
 
 @Injectable()
 export class MenuService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    @InjectRepository(Beverage)
+    private readonly beverageRepository: Repository<Beverage>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
 
   public getAllMenu(title?: string): Promise<Array<BeverageOpts>> {
-    return this.prismaService.beverage.findMany({
+    return this.beverageRepository.find({
       where: {
-        title: {
-          contains: title,
-        },
+        title: Like(`%${title}%`),
       },
       select: {
         id: true,
@@ -25,48 +29,33 @@ export class MenuService {
     });
   }
 
-  public async getFavoriteBeverages(userId: number) {
-    const beverages = await this.prismaService.beverage.findMany({
-      include: {
-        favoriteBeverages: {
-          where: {
-            userId,
-          },
-          select: {
-            beverageId: true,
-          },
+  public getFavoriteBeverages(userId: number): Promise<Array<Beverage>> {
+    return this.beverageRepository.find({
+      where: {
+        usersWhoLiked: {
+          id: userId,
         },
       },
     });
-
-    return beverages
-      .filter((beverage) => beverage.favoriteBeverages.length !== 0)
-      .map((beverage) => ({
-        id: beverage.id,
-        title: beverage.title,
-        price: beverage.price,
-        isFavorite: beverage.favoriteBeverages.length !== 0,
-      }));
   }
 
   public async getBeverageById(
     host: string,
     beverageId: number,
     userId?: number,
-  ): Promise<IBeverage> {
-    const beverage = await this.prismaService.beverage.findFirst({
+  ): Promise<Beverage & { isFavorite: boolean }> {
+    const beverage = await this.beverageRepository.findOne({
       where: {
         id: beverageId,
       },
     });
 
-    let favoriteBeverage = null;
+    let favoriteBeverage: Beverage | null = null;
 
     if (Boolean(userId)) {
-      favoriteBeverage = await this.prismaService.favoriteBeverages.findFirst({
+      favoriteBeverage = await this.beverageRepository.findOne({
         where: {
-          beverageId,
-          userId,
+          id: beverageId,
         },
       });
     }
@@ -74,19 +63,20 @@ export class MenuService {
     return {
       ...beverage,
       imgUrl: `${host}/assets/${beverage.title}.jpeg`,
-      isFavorite: Boolean(favoriteBeverage),
+      isFavorite: Boolean(
+        favoriteBeverage?.usersWhoLiked?.some((item) => item?.id === userId),
+      ),
     };
   }
 
-  public updateBeverage(
+  public async updateBeverage(
     beverageId: number,
     dto: UpdateBeverageDto,
   ): Promise<Beverage> {
-    return this.prismaService.beverage.update({
-      where: {
-        id: beverageId,
-      },
-      data: dto,
+    await this.beverageRepository.update({ id: beverageId }, dto);
+
+    return this.beverageRepository.findOne({
+      where: { id: beverageId },
     });
   }
 
@@ -94,25 +84,22 @@ export class MenuService {
     beverageId,
     userId,
   }: ToggleFavoriteDto): Promise<FavoriteBeverages> {
-    const beverage = await this.prismaService.favoriteBeverages.findFirst({
+    const beverage = await this.beverageRepository.findOne({
       where: {
-        beverageId,
-        userId,
+        id: beverageId,
+        usersWhoLiked: { id: userId },
       },
     });
 
     if (beverage) {
-      return this.prismaService.favoriteBeverages.delete({
-        where: {
-          beverageId_userId: {
-            beverageId,
-            userId,
-          },
-        },
-      });
+      await this.beverageRepository
+        .createQueryBuilder()
+        .relation(User, 'favoriteBeverages')
+        .of(userId)
+        .remove(beverageId);
     }
 
-    return this.prismaService.favoriteBeverages.create({
+    const beverageCreated = this.beverageRepository.create({
       data: {
         beverageId,
         userId,

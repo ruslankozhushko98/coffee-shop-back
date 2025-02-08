@@ -18,8 +18,9 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "migrate:dev": "npx prisma migrate dev --name=coffee_shop_db",
-    "seed": "npx prisma db seed"
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli",
+    "migration:gen": "typeorm migration:create ./src/migrations/CreateTables",
+    "migrate": "typeorm migration:run -d src/data-source.ts"
   },
   "prisma": {
     "seed": "ts-node src/prisma/prisma.seed.ts"
@@ -34,6 +35,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/serve-static": "^4.0.1",
     "@nestjs/throttler": "^5.1.1",
+    "@nestjs/typeorm": "^11.0.0",
     "@prisma/client": "^6.0.1",
     "argon2": "^0.31.2",
     "class-transformer": "^0.5.1",
@@ -46,8 +48,10 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
+    "pg": "^8.13.1",
     "reflect-metadata": "^0.2.0",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "typeorm": "^0.3.20"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

@@ -1,27 +1,29 @@
 import { ConfigService } from '@nestjs/config';
 import { ForbiddenException, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
-import * as argon2 from 'argon2';
-import { User } from '@prisma/client';
-import * as crypto from 'crypto';
+import argon2 from 'argon2';
+import crypto from 'crypto';
+import { Repository } from 'typeorm';
 
-import { ENV_VARS } from 'src/utils/constants';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { ENV_VARS, Gender } from 'src/utils/constants';
 import { AccountService } from 'src/account/account.service';
 import { AuthObj, Payload } from './utils/types';
 import { SignInDto, SignUpDto, PublicKeyDto, AuthBiometricDto } from './dto';
+import { User } from './entities';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prismaService: PrismaService,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
     private readonly accountService: AccountService,
   ) {}
 
   public async signIn(signInDto: SignInDto): Promise<AuthObj> {
-    const user = await this.prismaService.user.findFirst({
+    const user = await this.usersRepository.findOne({
       where: {
         email: signInDto.email,
       },
@@ -61,7 +63,7 @@ export class AuthService {
   public async signUp(
     signUpDto: SignUpDto,
   ): Promise<Pick<AuthObj, 'accessToken'>> {
-    const user = await this.prismaService.user.findFirst({
+    const user = await this.usersRepository.findOne({
       where: {
         email: signUpDto.email,
       },
@@ -73,16 +75,17 @@ export class AuthService {
 
     const passwordHash: string = await argon2.hash(signUpDto.password);
 
-    const newUser = await this.prismaService.user.create({
-      data: {
-        ...signUpDto,
-        password: passwordHash,
-      },
+    const newUser = this.usersRepository.create({
+      ...signUpDto,
+      gender: signUpDto.gender as Gender,
+      password: passwordHash,
     });
 
+    const userSaved = await this.usersRepository.save(newUser);
+
     const accessToken = await this.signToken({
-      userId: newUser.id,
-      email: newUser.email,
+      userId: userSaved.id,
+      email: userSaved.email,
     });
 
     return { accessToken };
@@ -97,7 +100,7 @@ export class AuthService {
   public async getMe(
     userId: number,
   ): Promise<Omit<User, 'password' | 'publicKey'>> {
-    const user = await this.prismaService.user.findUnique({
+    const user = await this.usersRepository.findOne({
       where: {
         id: userId,
       },
@@ -114,14 +117,12 @@ export class AuthService {
     key,
   }: PublicKeyDto): Promise<{ message: string }> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const res = await this.prismaService.user.update({
-      where: {
+    const res = await this.usersRepository.update(
+      {
         id: userId,
       },
-      data: {
-        publicKey: key,
-      },
-    });
+      { publicKey: key },
+    );
 
     return {
       message: 'Key stored successfully',
@@ -134,7 +135,7 @@ export class AuthService {
   }: AuthBiometricDto): Promise<AuthObj> {
     const userId = Number(payload.split('__')[0]);
 
-    const user = await this.prismaService.user.findUnique({
+    const user = await this.usersRepository.findOne({
       where: {
         id: userId,
       },

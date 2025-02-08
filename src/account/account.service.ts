@@ -3,44 +3,55 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import * as dayjs from 'dayjs';
-import * as crypto from 'crypto';
-import * as argon from 'argon2';
-import { User } from '@prisma/client';
+import { InjectRepository } from '@nestjs/typeorm';
+import dayjs from 'dayjs';
+import crypto from 'crypto';
+import argon from 'argon2';
+import { Repository } from 'typeorm';
 
 import { checkIsOTCExpired, generateOTC } from 'src/utils/helpers';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { EmailService } from 'src/email/email.service';
+import { OTC, Token, User } from 'src/auth/entities';
 import { OTC_DURATION, OTC_LENGTH } from './utils/constants';
 import { OneTimeCodeDto, ResetPasswordDto } from './dto';
 
 @Injectable()
 export class AccountService {
   constructor(
-    private prismaService: PrismaService,
-    private emailService: EmailService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(OTC)
+    private readonly otcRepository: Repository<OTC>,
+    @InjectRepository(Token)
+    private readonly tokenRepository: Repository<Token>,
+    private readonly emailService: EmailService,
   ) {}
 
   public async createOTC(userId: number) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const otcRemoved = await this.prismaService.oneTimeCode.deleteMany({
-      where: {
-        userId,
-      },
+    const otcRemoved = await this.otcRepository.delete({
+      user: { id: userId },
     });
 
     const code = generateOTC(OTC_LENGTH);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const otc = await this.prismaService.oneTimeCode.create({
-      data: {
-        userId,
-        code,
-        expiresAt: dayjs().add(OTC_DURATION, 'minutes').toDate(),
+    const otcCreated = this.otcRepository.create({
+      user: {
+        id: userId,
       },
-      include: {
-        user: true,
+      code,
+      expiresAt: dayjs().add(OTC_DURATION, 'minutes').toDate().toString(),
+    });
+
+    await this.otcRepository.save(otcCreated);
+
+    const otc = await this.otcRepository.findOne({
+      where: {
+        user: {
+          id: userId,
+        },
       },
+      relations: ['user'],
     });
 
     await this.emailService.sendEmail({
@@ -55,9 +66,11 @@ export class AccountService {
   }
 
   public async activateAccount(userId: number, code: string) {
-    const otc = await this.prismaService.oneTimeCode.findFirst({
+    const otc = await this.otcRepository.findOne({
       where: {
-        userId,
+        user: {
+          id: userId,
+        },
         code,
       },
     });
@@ -66,27 +79,21 @@ export class AccountService {
       throw new NotFoundException('Invalid one-time code');
     }
 
-    const isOTCExpired: boolean = checkIsOTCExpired(otc.expiresAt);
+    const isOTCExpired: boolean = checkIsOTCExpired(new Date(otc.expiresAt));
 
     if (isOTCExpired) {
       throw new NotFoundException('One-time code is expired');
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const user = await this.prismaService.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        isActivated: true,
-      },
-    });
+    const user = await this.userRepository.update(
+      { id: userId },
+      { isActivated: true },
+    );
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const otcDeleted = await this.prismaService.oneTimeCode.delete({
-      where: {
-        id: otc.id,
-      },
+    const otcDeleted = await this.otcRepository.delete({
+      id: otc.id,
     });
 
     return {
@@ -95,7 +102,7 @@ export class AccountService {
   }
 
   public async checkUser(email: string) {
-    const user = await this.prismaService.user.findFirst({
+    const user = await this.userRepository.findOne({
       where: {
         email,
       },
@@ -105,10 +112,8 @@ export class AccountService {
       throw new NotFoundException('User with such email does not exist!');
     }
 
-    await this.prismaService.oneTimeCode.deleteMany({
-      where: {
-        userId: user.id,
-      },
+    await this.otcRepository.delete({
+      user: { id: user.id },
     });
 
     const { message } = await this.createOTC(user.id);
@@ -123,16 +128,16 @@ export class AccountService {
     code,
     userId,
   }: OneTimeCodeDto): Promise<{ userId: number; token: string }> {
-    await this.prismaService.token.deleteMany({
-      where: {
+    await this.tokenRepository.delete({
+      user: {
         id: userId,
       },
     });
 
-    const otc = await this.prismaService.oneTimeCode.findFirst({
+    const otc = await this.otcRepository.findOne({
       where: {
         code,
-        userId,
+        user: { id: userId },
       },
     });
 
@@ -140,7 +145,7 @@ export class AccountService {
       throw new NotFoundException('Invalid one-time code');
     }
 
-    const isOTCExpired: boolean = checkIsOTCExpired(otc.expiresAt);
+    const isOTCExpired: boolean = checkIsOTCExpired(new Date(otc.expiresAt));
 
     if (isOTCExpired) {
       throw new NotFoundException('One-time code is expired');
@@ -149,12 +154,12 @@ export class AccountService {
     const hex: string = crypto.randomBytes(64).toString('hex');
     const token: string = await argon.hash(hex);
 
-    await this.prismaService.token.create({
-      data: {
-        userId,
-        token,
-      },
+    const tokenCreated = this.tokenRepository.create({
+      user: { id: userId },
+      token,
     });
+
+    await this.tokenRepository.save(tokenCreated);
 
     return {
       token,
@@ -167,9 +172,9 @@ export class AccountService {
     resetToken,
     password,
   }: ResetPasswordDto): Promise<User> {
-    const { token } = await this.prismaService.token.findFirst({
+    const { token } = await this.tokenRepository.findOne({
       where: {
-        userId,
+        user: { id: userId },
       },
     });
 
@@ -179,13 +184,18 @@ export class AccountService {
 
     const passwordHash: string = await argon.hash(password);
 
-    return this.prismaService.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        password: passwordHash,
-      },
+    const updatedUser = await this.userRepository.findOne({
+      where: { id: userId },
     });
+
+    updatedUser.password = passwordHash;
+
+    const user = await this.userRepository.save(updatedUser);
+
+    await this.tokenRepository.delete({
+      user: { id: userId },
+    });
+
+    return user;
   }
 }

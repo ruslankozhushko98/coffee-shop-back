@@ -8,3 +8,9 @@ export enum ENV_VARS {
   EMAIL_SERVICE = 'EMAIL_SERVICE',
   DATABASE_URL = 'DATABASE_URL',
 }
+
+export enum Gender {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
+  OTHER = 'OTHER',
+}

@@ -1,4 +1,4 @@
-import { User } from '@prisma/client';
+import { User } from 'src/auth/entities';
 
 export type Payload = {
   userId: number;
