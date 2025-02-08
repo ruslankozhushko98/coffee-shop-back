@@ -7,5 +7,5 @@ export type Payload = {
 
 export type AuthObj = {
   accessToken: string;
-  user: Omit<User, 'password' | 'publicKey'>;
+  user: Omit<User, 'password'>;
 };

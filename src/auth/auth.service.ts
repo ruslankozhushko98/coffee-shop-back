@@ -50,7 +50,6 @@ export class AuthService {
     });
 
     delete user.password;
-    delete user.publicKey;
 
     return {
       accessToken,
@@ -94,9 +93,7 @@ export class AuthService {
     });
   }
 
-  public async getMe(
-    userId: number,
-  ): Promise<Omit<User, 'password' | 'publicKey'>> {
+  public async getMe(userId: number): Promise<Omit<User, 'password'>> {
     const user = await this.prismaService.user.findUnique({
       where: {
         id: userId,
@@ -104,7 +101,6 @@ export class AuthService {
     });
 
     delete user.password;
-    delete user.publicKey;
 
     return user;
   }
@@ -114,12 +110,10 @@ export class AuthService {
     key,
   }: PublicKeyDto): Promise<{ message: string }> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const res = await this.prismaService.user.update({
-      where: {
-        id: userId,
-      },
+    const res = await this.prismaService.publicKey.create({
       data: {
         publicKey: key,
+        userId,
       },
     });
 
@@ -137,6 +131,9 @@ export class AuthService {
     const user = await this.prismaService.user.findUnique({
       where: {
         id: userId,
+      },
+      include: {
+        publicKey: true,
       },
     });
 
@@ -166,7 +163,6 @@ export class AuthService {
     });
 
     delete user.password;
-    delete user.publicKey;
 
     return {
       accessToken,

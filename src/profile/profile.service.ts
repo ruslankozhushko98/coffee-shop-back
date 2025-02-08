@@ -17,7 +17,6 @@ export class ProfileService {
     });
 
     delete user.password;
-    delete user.publicKey;
 
     return user;
   }

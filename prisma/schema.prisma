@@ -40,14 +40,25 @@ model User {
   dob               String              @map("date_of_birth")
   gender            GENDER?             @default(OTHER)
   orders            Order[]
-  publicKey         String?             @map("public_key")
   isActivated       Boolean?            @default(false) @map("is_activated")
   favoriteBeverages FavoriteBeverages[]
+  publicKey         PublicKey?
   starsBalance      Int?                @default(0) @map("stars_balance")
   createdAt         DateTime            @default(now()) @map("created_at")
   updatedAt         DateTime            @updatedAt @map("updated_at")
 
   @@map("users")
+}
+
+model PublicKey {
+  id        Int      @id @default(autoincrement())
+  publicKey String   @unique @map("public_key")
+  userId    Int      @unique @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("public_keys")
 }
 
 model Order {
