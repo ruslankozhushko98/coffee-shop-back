@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Order, ORDER_STATUS } from '@prisma/client';
 
-import { LimitOffset } from 'src/shared/utils/types';
+import { LimitOffset } from 'src/utils/types';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateOrderDto } from './dto';
 

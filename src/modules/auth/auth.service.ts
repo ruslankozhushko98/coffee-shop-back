@@ -5,7 +5,7 @@ import * as argon2 from 'argon2';
 import { User } from '@prisma/client';
 import * as crypto from 'crypto';
 
-import { ENV_VARS } from 'src/shared/utils/constants';
+import { ENV_VARS } from 'src/utils/constants';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AccountService } from 'src/modules/account/account.service';
 import { AuthObj, Payload } from './utils/types';
