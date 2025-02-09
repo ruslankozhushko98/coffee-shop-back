@@ -6,14 +6,14 @@ import { join } from 'path';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { OrdersModule } from './orders/orders.module';
+import { OrdersModule } from './modules/orders/orders.module';
 import { EmailModule } from './email/email.module';
-import { AccountModule } from './account/account.module';
-import { MenuModule } from './menu/menu.module';
-import { CheckUserMiddleware } from './check-user/check-user.middleware';
-import { ProfileModule } from './profile/profile.module';
+import { AccountModule } from './modules/account/account.module';
+import { MenuModule } from './modules/menu/menu.module';
+import { CheckUserMiddleware } from './common/middlewares/check-user/check-user.middleware';
+import { ProfileModule } from './modules/profile/profile.module';
 import { RedisModule } from './redis/redis.module';
 
 @Module({

@@ -8,7 +8,7 @@ import * as crypto from 'crypto';
 import * as argon from 'argon2';
 import { User } from '@prisma/client';
 
-import { checkIsOTCExpired, generateOTC } from 'src/utils/helpers';
+import { checkIsOTCExpired, generateOTC } from 'src/shared/utils/helpers';
 import { RedisService } from 'src/redis/redis.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EmailService } from 'src/email/email.service';

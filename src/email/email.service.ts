@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 
-import { ENV_VARS } from 'src/utils/constants';
+import { ENV_VARS } from 'src/shared/utils/constants';
 import { EmailDto } from './dto';
 
 @Injectable()

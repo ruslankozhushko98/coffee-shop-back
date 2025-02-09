@@ -5,7 +5,7 @@ import {
   IsStrongPassword,
 } from 'class-validator';
 
-import { PasswordMatches } from 'src/utils/decorators';
+import { PasswordMatches } from 'src/common/decorators';
 
 export class ResetPasswordDto {
   @IsNumber()

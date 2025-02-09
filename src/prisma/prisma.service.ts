@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 
-import { ENV_VARS } from 'src/utils/constants';
+import { ENV_VARS } from 'src/shared/utils/constants';
 
 @Injectable()
 export class PrismaService extends PrismaClient {
