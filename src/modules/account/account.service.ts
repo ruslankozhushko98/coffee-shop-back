@@ -11,7 +11,7 @@ import { User } from '@prisma/client';
 import { checkIsOTCExpired, generateOTC } from 'src/shared/utils/helpers';
 import { RedisService } from 'src/redis/redis.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { EmailService } from 'src/email/email.service';
+import { EmailService } from 'src/modules/email/email.service';
 import { OTC_DURATION, OTC_LENGTH } from './utils/constants';
 import { OneTimeCodeDto, ResetPasswordDto } from './dto';
 

@@ -9,7 +9,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { OrdersModule } from './modules/orders/orders.module';
-import { EmailModule } from './email/email.module';
+import { EmailModule } from './modules/email/email.module';
 import { AccountModule } from './modules/account/account.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { CheckUserMiddleware } from './common/middlewares/check-user/check-user.middleware';
