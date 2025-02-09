@@ -1,4 +1,6 @@
-import { PrismaClient, Beverage } from '@prisma/client';
+import { PrismaClient, Beverage, User, ROLES, GENDER } from '@prisma/client';
+import * as argon from 'argon2';
+import * as dayjs from 'dayjs';
 import { join } from 'path';
 
 type BeverageOptions = Pick<
@@ -6,7 +8,42 @@ type BeverageOptions = Pick<
   'title' | 'description' | 'imgUrl' | 'price' | 'starsCount'
 >;
 
+type UserOptions = Pick<
+  User,
+  | 'email'
+  | 'firstName'
+  | 'lastName'
+  | 'password'
+  | 'dob'
+  | 'gender'
+  | 'role'
+  | 'isActivated'
+>;
+
 const prisma = new PrismaClient();
+
+const getUsers = (password: string): Array<UserOptions> => [
+  {
+    email: 'client@example.com',
+    password,
+    firstName: 'John',
+    lastName: 'Doe',
+    dob: dayjs().subtract(18, 'year').toString(),
+    gender: GENDER.MALE,
+    role: ROLES.CLIENT,
+    isActivated: true,
+  },
+  {
+    email: 'admin@example.com',
+    password,
+    firstName: 'Jane',
+    lastName: 'Doe',
+    dob: dayjs().subtract(18, 'year').toString(),
+    gender: GENDER.FEMALE,
+    role: ROLES.ADMIN,
+    isActivated: true,
+  },
+];
 
 export const beverages: Array<BeverageOptions> = [
   {
@@ -56,13 +93,23 @@ export const beverages: Array<BeverageOptions> = [
 
 const upsertBeverage = (data: BeverageOptions): Promise<Beverage> =>
   prisma.beverage.upsert({
-    where: {
-      title: data.title,
-    },
+    where: { title: data.title },
+    update: {},
+    create: data,
+  });
+
+const upsertUsers = (data: UserOptions): Promise<User> =>
+  prisma.user.upsert({
+    where: { email: data.email },
     update: {},
     create: data,
   });
 
 (async () => {
   await Promise.allSettled(beverages.map(upsertBeverage));
+
+  const hashedPassword = await argon.hash('Pa$$w0rd');
+  const users = getUsers(hashedPassword);
+
+  await Promise.allSettled(users.map(upsertUsers));
 })();

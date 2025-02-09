@@ -8,3 +8,5 @@ export enum ENV_VARS {
   EMAIL_SERVICE = 'EMAIL_SERVICE',
   DATABASE_URL = 'DATABASE_URL',
 }
+
+export const DATE_FORMAT = 'MM/DD/YYYY';
