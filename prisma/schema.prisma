@@ -71,7 +71,7 @@ model Order {
   id           Int                 @id @default(autoincrement())
   user         User                @relation(fields: [userId], references: [id], onDelete: NoAction)
   userId       Int                 @map("user_id")
-  price        Int
+  price        Decimal
   starsCount   Int?                @default(0) @map("stars_count")
   beverages    BeveragesOnOrders[]
   status       ORDER_STATUS        @default(RECEIVED)
@@ -87,7 +87,7 @@ model Beverage {
   title             String              @unique
   description       String
   imgUrl            String              @map("img_url")
-  price             Int
+  price             Decimal
   starsCount        Int?                @default(0) @map("stars_count")
   orders            BeveragesOnOrders[]
   favoriteBeverages FavoriteBeverages[]
