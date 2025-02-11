@@ -1,8 +1,9 @@
-import { User } from '@prisma/client';
+import { ROLES, User } from '@prisma/client';
 
 export type Payload = {
   userId: number;
   email: string;
+  role: ROLES;
 };
 
 export type AuthObj = {

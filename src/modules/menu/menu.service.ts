@@ -3,7 +3,7 @@ import { Beverage, FavoriteBeverages } from '@prisma/client';
 
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BeverageOpts } from './utils/types';
-import { ToggleFavoriteDto, UpdateBeverageDto } from './dto';
+import { CreateBeverageDto, ToggleFavoriteDto, UpdateBeverageDto } from './dto';
 import { IBeverage } from './models';
 
 @Injectable()
@@ -76,6 +76,10 @@ export class MenuService {
       imgUrl: `${host}/assets/${beverage.title}.jpeg`,
       isFavorite: Boolean(favoriteBeverage),
     };
+  }
+
+  public createBeverage(dto: CreateBeverageDto): Promise<Beverage> {
+    return this.prismaService.beverage.create({ data: dto });
   }
 
   public updateBeverage(

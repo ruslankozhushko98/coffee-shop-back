@@ -1,6 +1,7 @@
 import { BEVERAGE_TYPES, SIZES } from '@prisma/client';
 import {
   IsArray,
+  IsDecimal,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -32,7 +33,7 @@ export class CreateOrderDto {
   @IsNotEmpty()
   userId: number;
 
-  @IsNumber()
+  @IsDecimal()
   @IsNotEmpty()
   price: number;
 

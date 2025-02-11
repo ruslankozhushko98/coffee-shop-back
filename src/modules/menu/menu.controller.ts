@@ -4,15 +4,19 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Post,
   Put,
   Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { ROLES } from '@prisma/client';
 
+import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { MenuService } from './menu.service';
-import { ToggleFavoriteDto, UpdateBeverageDto } from './dto';
+import { CreateBeverageDto, ToggleFavoriteDto, UpdateBeverageDto } from './dto';
+import { Roles } from 'src/common/decorators';
 
 @Controller('menu')
 export class MenuController {
@@ -38,7 +42,15 @@ export class MenuController {
     return this.menuService.getBeverageById(host, beverageId, req.user?.id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(ROLES.ADMIN)
+  @Post('beverage/create')
+  public createBeverage(dto: CreateBeverageDto) {
+    return this.menuService.createBeverage(dto);
+  }
+
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(ROLES.ADMIN)
   @Put(':beverageId/update')
   public updateBeverage(
     @Param('beverageId', ParseIntPipe) beverageId: number,

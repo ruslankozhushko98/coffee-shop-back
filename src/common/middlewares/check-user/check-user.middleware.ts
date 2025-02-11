@@ -15,6 +15,7 @@ export class CheckUserMiddleware implements NestMiddleware {
       req.user = {
         id: userData.userId,
         email: userData.email,
+        role: userData.role,
       };
     }
 

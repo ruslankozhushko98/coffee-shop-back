@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
-import { User } from '@prisma/client';
+import { ROLES, User } from '@prisma/client';
 import * as crypto from 'crypto';
 
 import { ENV_VARS } from 'src/utils/constants';
@@ -47,6 +47,7 @@ export class AuthService {
     const accessToken = await this.signToken({
       userId: user.id,
       email: user.email,
+      role: user.role,
     });
 
     delete user.password;
@@ -82,6 +83,7 @@ export class AuthService {
     const accessToken = await this.signToken({
       userId: newUser.id,
       email: newUser.email,
+      role: ROLES.ADMIN,
     });
 
     return { accessToken };
@@ -160,6 +162,7 @@ export class AuthService {
     const accessToken = await this.signToken({
       userId: user.id,
       email: user.email,
+      role: user.role,
     });
 
     delete user.password;
