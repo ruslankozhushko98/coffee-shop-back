@@ -17,11 +17,6 @@ export class MenuService {
           contains: title,
         },
       },
-      select: {
-        id: true,
-        title: true,
-        price: true,
-      },
     });
   }
 

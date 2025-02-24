@@ -16,7 +16,7 @@ import { ROLES } from '@prisma/client';
 import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { Roles } from 'src/common/decorators';
 import { MenuService } from './menu.service';
-import { CreateBeverageDto, ToggleFavoriteDto, UpdateBeverageDto } from './dto';
+import { CreateBeverageDto, UpdateBeverageDto } from './dto';
 
 @Controller('menu')
 export class MenuController {
@@ -33,7 +33,7 @@ export class MenuController {
     return this.menuService.getFavoriteBeverages(req.user?.id);
   }
 
-  @Get(':beverageId')
+  @Get('beverages/:beverageId')
   public getBeverageById(
     @Param('beverageId', ParseIntPipe) beverageId: number,
     @Req() req,
@@ -60,8 +60,14 @@ export class MenuController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Put('/toggle-favorite')
-  public toggleFavorite(@Body() dto: ToggleFavoriteDto) {
-    return this.menuService.toggleFavorite(dto);
+  @Put('/beverages/:beverageId/toggle-favorite')
+  public toggleFavorite(
+    @Param('beverageId', ParseIntPipe) beverageId: number,
+    @Req() req,
+  ) {
+    return this.menuService.toggleFavorite({
+      beverageId,
+      userId: req.user?.id,
+    });
   }
 }
