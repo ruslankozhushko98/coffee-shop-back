@@ -23,8 +23,9 @@ export class MenuController {
   constructor(private readonly menuService: MenuService) {}
 
   @Get('all')
-  public getAllMenu(@Query('title') title: string) {
-    return this.menuService.getAllMenu(title);
+  public getAllMenu(@Query('title') title: string, @Req() req) {
+    const host = `${req.protocol}://${req.get('host')}`;
+    return this.menuService.getAllMenu(host, title);
   }
 
   @UseGuards(AuthGuard('jwt'))

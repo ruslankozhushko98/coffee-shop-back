@@ -10,14 +10,22 @@ import { IBeverage } from './models';
 export class MenuService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  public getAllMenu(title?: string): Promise<Array<BeverageOpts>> {
-    return this.prismaService.beverage.findMany({
+  public async getAllMenu(
+    host: string,
+    title?: string,
+  ): Promise<Array<BeverageOpts>> {
+    const beverages = await this.prismaService.beverage.findMany({
       where: {
         title: {
           contains: title,
         },
       },
     });
+
+    return beverages.map((beverage) => ({
+      ...beverage,
+      imgUrl: `${host}/assets/${beverage.title}.jpeg`,
+    }));
   }
 
   public async getFavoriteBeverages(userId: number) {
